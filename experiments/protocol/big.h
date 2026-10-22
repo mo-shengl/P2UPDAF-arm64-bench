@@ -395,7 +395,7 @@ public:
     /*--------------------------------------------------------------�Լ����ӵ������ϵ�ģ������-------------------------------------------------------------------*/
 
     friend Big from_binary(int, char *);
-    friend int to_binary(const Big &, int, char *, BOOL justify = FALSE);
+    friend int to_binary(const Big &, int, char *, BOOL justify);
     friend Big modmult(const Big &, const Big &, const Big &);
     friend Big mad(const Big &, const Big &, const Big &, const Big &, Big &);
     friend Big norm(const Big &);
@@ -413,7 +413,7 @@ public:
     // x^m.y^k mod n
     friend Big pow(int, Big *, Big *, Big); // x[0]^m[0].x[1].m[1]... mod n
 
-    friend Big luc(const Big &, const Big &, const Big &, Big *b4 = NULL);
+    friend Big luc(const Big &, const Big &, const Big &, Big *b4);
     friend Big inverse(const Big &, const Big &);
     friend void multi_inverse(int, Big *, const Big &, Big *);
 #ifndef MR_NO_RAND
@@ -442,8 +442,8 @@ public:
     friend void modulo(const Big &);
     friend BOOL modulo(int, int, int, int, BOOL);
     friend Big get_modulus(void);
-    friend int window(const Big &, int, int *, int *, int window_size = 5);
-    friend int naf_window(const Big &, const Big &, int, int *, int *, int window_size = 5);
+    friend int window(const Big &, int, int *, int *, int window_size);
+    friend int naf_window(const Big &, const Big &, int, int *, int *, int window_size);
 
     /* Montgomery stuff */
 
@@ -456,7 +456,7 @@ public:
     friend Big nres_pow(const Big&,const Big&);
     friend Big nres_pow2(const Big&,const Big&,const Big&,const Big&);
     friend Big nres_pown(int,Big *,Big *);
-    friend Big nres_luc(const Big&,const Big&,Big *b3=NULL);
+    friend Big nres_luc(const Big&,const Big&,Big *b3);
     friend Big nres_sqrt(const Big&);
     friend Big nres_modadd(const Big&,const Big&);
     friend Big nres_modsub(const Big&,const Big&);

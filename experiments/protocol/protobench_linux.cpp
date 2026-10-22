@@ -222,10 +222,10 @@ static void zzn2_to_bytes(ZZn2 &x, vector<char> &buf)
     Big a, b;
     x.get(a, b);
     char c[256];
-    int nb = to_binary(a, 256, c);
+    int nb = to_binary(a, 256, c, FALSE);
     for (int i = 0; i < nb; i++)
         buf.push_back(c[i]);
-    nb = to_binary(b, 256, c);
+    nb = to_binary(b, 256, c, FALSE);
     for (int i = 0; i < nb; i++)
         buf.push_back(c[i]);
 }
@@ -234,10 +234,10 @@ static void ecn_to_bytes(ECn &P, vector<char> &buf)
     Big x, y;
     P.get(x, y);
     char c[256];
-    int nb = to_binary(x, 256, c);
+    int nb = to_binary(x, 256, c, FALSE);
     for (int i = 0; i < nb; i++)
         buf.push_back(c[i]);
-    nb = to_binary(y, 256, c);
+    nb = to_binary(y, 256, c, FALSE);
     for (int i = 0; i < nb; i++)
         buf.push_back(c[i]);
 }
