@@ -1,0 +1,69 @@
+name: arm64-bench
+
+# Embedded/ARM platform benchmark for P2UPDAF (Section VII, revision item 7.1).
+#
+# Runs the full protocol benchmark on GitHub's public ARM64 runner
+# (ubuntu-24.04-arm, real ARM hardware) three times, keeps all raw CSVs,
+# and uploads them as workflow artifacts for reviewer reproducibility.
+#
+# The MIRACL core sources under experiments/miracl-core/ are vendored from
+# github.com/miracl/MIRACL (Apache License 2.0).
+
+on:
+  push:
+    paths:
+      - "experiments/**"
+      - ".github/workflows/arm64-bench.yml"
+  workflow_dispatch: {}
+
+jobs:
+  bench-arm64:
+    runs-on: ubuntu-24.04-arm        # public ARM64 runner
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile (gcc -O2, MIRACL core + protocol benchmark)
+        run: |
+          set -e
+          cd experiments
+          mkdir -p build results
+          INC="-I miracl-core/include -I protocol"
+          # core library (C)
+          for f in miracl-core/source/*.c; do
+            gcc -c -O2 -DMR_NOASM $INC "$f" -o build/$(basename "$f" .c).o
+          done
+          # C++ wrappers + benchmark
+          g++ -c -O2 $INC protocol/big.cpp    -o build/big.o
+          g++ -c -O2 $INC protocol/ecn.cpp    -o build/ecn.o
+          g++ -c -O2 $INC protocol/zzn.cpp    -o build/zzn.o
+          g++ -c -O2 $INC protocol/zzn2.cpp   -o build/zzn2.o
+          # P2UPDAF_SKIP_PAIRVALUE_CHECKS: the new MIRACL core's pairing
+          # VALUE differs from the validated Windows reference build (see
+          # README_Pi/README; timing is unaffected, all operations are the
+          # same). BSGS decode checks stay enabled.
+          g++ -c -O2 -DP2UPDAF_SKIP_PAIRVALUE_CHECKS $INC protocol/protobench_linux.cpp -o build/protobench.o
+          g++ build/*.o -o protobench_arm64
+          echo "BUILD OK"
+
+      - name: Run benchmark (3 trials, pinned to one core)
+        run: |
+          set -e
+          cd experiments
+          for i in 1 2 3; do
+            taskset -c 0 ./protobench_arm64 20261013 results/protocol_arm64_run${i}.csv
+          done
+          echo "=== trials ==="
+          head -1 results/protocol_arm64_run1.csv
+          grep -m1 '^512,160' results/protocol_arm64_run1.csv || true
+          echo "=== platform info ==="
+          uname -m
+          grep -m1 "model name\|CPU part\|Hardware" /proc/cpuinfo || true
+
+      - name: Upload raw results
+        uses: actions/upload-artifact@v4
+        with:
+          name: protocol-arm64-csv
+          path: |
+            experiments/results/protocol_arm64_run*.csv
+            experiments/protobench_arm64
